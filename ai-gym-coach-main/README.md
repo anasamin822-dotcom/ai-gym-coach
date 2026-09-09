@@ -1,7 +1,7 @@
 # 🏋️ AI Gym Coach: Real-Time Computer Vision & Voice-Guided Fitness Coach
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
-[![Streamlit Cloud](https://img.shields.io/badge/Streamlit%20Cloud-Deployed-FF4B4B?logo=streamlit&logoColor=white)](https://ai-gym-coach.streamlit.app/)
+[![Streamlit Cloud](https://img.shields.io/badge/Streamlit%20Cloud-Deployed-FF4B4B?logo=streamlit&logoColor=white)](https://ai-gym-coach-bndhslamytm6wpyg5beqeo.streamlit.app/)
 [![MediaPipe Tasks](https://img.shields.io/badge/MediaPipe-Tasks%200.10-0078D4?logo=google&logoColor=white)](https://developers.google.com/mediapipe)
 [![WebRTC](https://img.shields.io/badge/WebRTC-Real--Time%20Stream-333333?logo=webrtc&logoColor=white)](https://webrtc.org/)
 [![Groq Llama-3](https://img.shields.io/badge/Groq-Llama--3%20Ultra--Low%20Latency-F55036?logo=groq&logoColor=white)](https://groq.com/)
@@ -10,7 +10,7 @@
 
 > **Empowering solo athletes with computer-vision kinematic joint analysis, real-time muscular fatigue detection, live XP combo gamification, and sub-second LLM voice coaching.**
 
-[🚀 **Launch Live Demo on Streamlit Cloud**](https://ai-gym-coach.streamlit.app/) • [📑 **Architecture Overview**](#-system-architecture) • [⚡ **Hackathon Innovations**](#-hackathon-winning-innovations) • [💻 **Local Setup**](#-installation--local-setup)
+[🚀 **Launch Live Demo on Streamlit Cloud**](https://ai-gym-coach-bndhslamytm6wpyg5beqeo.streamlit.app/) • [📑 **Architecture Overview**](#-system-architecture) • [⚡ **Hackathon Innovations**](#-hackathon-winning-innovations) • [💻 **Local Setup**](#-installation--local-setup)
 
 ---
 
