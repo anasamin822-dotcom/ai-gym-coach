@@ -24,6 +24,8 @@ from services.coaching.llm import LLMCoach
 from services.coaching.tts import TextToSpeech
 from services.coaching.voice_pipeline import VoicePipeline, autoplay_audio
 from services.ui.bmi_diet_view import render_bmi_diet_planner
+from services.ui.session_ui import render_rest_timer_overlay, render_workout_summary_section
+from services.reporting.workout_report import calculate_session_metrics
 
   
 def main():
@@ -75,22 +77,41 @@ def main():
         if not workout_started:
             plan_exercise = st.selectbox("Exercise", options=EXERCISE_OPTIONS, key="plan_exercise")
 
-            plan_sets = st.number_input("Sets", min_value=0, max_value=50, key="plan_sets", step=1)
+            plan_sets = st.number_input("Target Sets", min_value=1, max_value=50, value=int(st.session_state.get("plan_sets", 3)), key="plan_sets", step=1)
 
-            plan_reps = st.number_input("Reps per Set", min_value=0, max_value=50, key="plan_reps", step=1)
+            plan_reps = st.number_input("Reps per Set", min_value=1, max_value=50, value=int(st.session_state.get("plan_reps", 10)), key="plan_reps", step=1)
+
+            plan_rest = st.slider(
+                "Rest Between Sets",
+                min_value=15,
+                max_value=180,
+                value=int(st.session_state.get("configured_rest_duration", 45)),
+                step=15,
+                format="%d sec",
+                key="slider_rest_duration"
+            )
+            st.session_state.configured_rest_duration = plan_rest
 
             st.markdown("")
 
-            start_session_button = st.button("Start Workout", width="stretch", key="start_session_button")
+            start_session_button = st.button("Start Workout", use_container_width=True, key="start_session_button")
 
             if start_session_button:
+                now_ts = time.time()
                 st.session_state.exercise_type = plan_exercise
                 st.session_state.target_sets = int(plan_sets)
                 st.session_state.reps_per_set = int(plan_reps)
+                st.session_state.configured_rest_duration = int(plan_rest)
+                st.session_state.rest_duration = int(plan_rest)
                 st.session_state.reps = 0
+                st.session_state.sets_completed = 0
+                st.session_state.current_set_reps = 0
                 st.session_state.workout_started = True
-                st.session_state.set_cycle_started_at = time.time()
+                st.session_state.workout_started_at = now_ts
+                st.session_state.set_cycle_started_at = now_ts
                 st.session_state.last_saved_sets_completed = 0
+                st.session_state.is_resting = False
+                st.session_state.last_session_report = None
 
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
@@ -112,10 +133,26 @@ def main():
 
             st.info(f"**{exercise}** -- {sets} Sets / {reps} Reps")
 
-            end_session_button = st.button("End Workout", key="end_session_button", width="stretch")
+            end_session_button = st.button("End Workout", key="end_session_button", use_container_width=True)
 
             if end_session_button:
+                duration_sec = time.time() - st.session_state.get("workout_started_at", time.time())
+                total_reps = st.session_state.get("reps", 0)
+                sets_done = st.session_state.get("sets_completed", 0)
+                user_name = st.session_state.get("username", "Athlete")
+
+                # Generate clean workout report for export
+                report = calculate_session_metrics(
+                    exercise=exercise,
+                    sets_completed=sets_done,
+                    total_reps=total_reps,
+                    duration_seconds=duration_sec,
+                    correct_form_reps=st.session_state.get("correct_form_reps", total_reps),
+                    username=user_name
+                )
+                st.session_state.last_session_report = report
                 st.session_state.workout_started = False
+                st.session_state.is_resting = False
                 
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
@@ -207,7 +244,16 @@ def main():
     ])
 
     with tab_workout:
+        # 1. Automatic Rest Timer Overlay (when between sets)
+        if workout_started and st.session_state.get("is_resting", False):
+            render_rest_timer_overlay(render_voice_feedback)
+
+        # 2. Standby Mode or Finished Session
         if not workout_started:
+            # If a session just concluded, display the instant Download Report & XP Summary
+            if st.session_state.get("last_session_report"):
+                render_workout_summary_section(st.session_state["last_session_report"])
+
             st.markdown(
                 """
                 <div style="
@@ -259,6 +305,26 @@ def main():
 
             sync_metrics_update(context)
 
+            # Check if all target sets have been completed
+            if st.session_state.get("workout_completed", False):
+                duration_sec = time.time() - st.session_state.get("workout_started_at", time.time())
+                total_reps = st.session_state.get("reps", 0)
+                sets_done = st.session_state.get("sets_completed", 0)
+                user_name = st.session_state.get("username", "Athlete")
+                ex_type = st.session_state.get("exercise_type", "Workout")
+
+                st.session_state.last_session_report = calculate_session_metrics(
+                    exercise=ex_type,
+                    sets_completed=sets_done,
+                    total_reps=total_reps,
+                    duration_seconds=duration_sec,
+                    correct_form_reps=st.session_state.get("correct_form_reps", total_reps),
+                    username=user_name
+                )
+                st.session_state.workout_started = False
+                st.session_state.is_resting = False
+                st.rerun()
+
             if context.state.playing:
                 time.sleep(0.25)
                 st.rerun()
@@ -297,7 +363,17 @@ def main():
                     "Time (sec)": "sum"
                 }).reset_index()
                 agg_df.index += 1
-                st.table(agg_df, border="horizontal")
+                st.dataframe(agg_df, use_container_width=True)
+
+                # Export full history CSV
+                st.download_button(
+                    "📥 Export Full History (CSV)",
+                    data=df.to_csv(index=False).encode("utf-8"),
+                    file_name="all_workout_history.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                    key="btn_download_all_history"
+                )
             else:
                 st.info("No workout history found.")
 

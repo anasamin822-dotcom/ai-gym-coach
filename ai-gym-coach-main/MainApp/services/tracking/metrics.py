@@ -79,6 +79,12 @@ def sync_metrics_update(context):
         st.session_state.set_cycle_started_at = now_ts
         st.session_state.last_saved_sets_completed = sets_completed
 
+        # Trigger automatic rest interval between sets if workout is ongoing
+        if not workout_completed:
+            st.session_state.is_resting = True
+            st.session_state.rest_started_at = now_ts
+            st.session_state.rest_duration = st.session_state.get("configured_rest_duration", 45)
+
     if workout_completed and not st.session_state.get("last_notified_workout_complete", False):
         st.session_state.last_notified_workout_complete = True
 

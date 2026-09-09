@@ -7,26 +7,38 @@ class LLMCoach:
         self.history = []
         self.system_prompt = PROMPT
 
-    def give_feedback(self, event, issue):
+    def give_feedback(self, event, issue=None):
         prompt = f"Event: {event}"
-
         if issue:
-            prompt += f" Form Issue: {issue}"
+            prompt += f" | Issue: {issue}"
+
+        fallback_responses = {
+            "workout_started": "Workout started! Focus on your form and keep a steady pace.",
+            "rep_completed": "Good rep! Keep your core tight.",
+            "form_warning": "Watch your form, stay balanced and controlled.",
+            "workout_ended": "Great session! Excellent effort today."
+        }
+        default_reply = fallback_responses.get(event, "Keep going, you're doing great!")
+
+        if not self.client:
+            return default_reply
 
         messages = [
             {"role": "system", "content": self.system_prompt},
-            *self.history[-10:],
+            *self.history[-4:],
             {"role": "user", "content": prompt}
         ]
 
-        response = self.client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=messages,
-            temperature=0.4,
-        )
-
-        text = response.choices[0].message.content.strip()
-        self.history.append({"role": "assistant", "content": text})
-
-        return text
-    
+        try:
+            response = self.client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=messages,
+                temperature=0.4,
+                max_tokens=60
+            )
+            text = response.choices[0].message.content.strip()
+            self.history.append({"role": "user", "content": prompt})
+            self.history.append({"role": "assistant", "content": text})
+            return text
+        except Exception:
+            return default_reply

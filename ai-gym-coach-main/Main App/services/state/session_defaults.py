@@ -37,6 +37,17 @@ def initial_session_defaults():
         "extension_status": "N/A",
         "back_arch_status": "N/A",
         "balance_status": "N/A",
+
+        # Automatic Rest Timer
+        "is_resting": False,
+        "rest_started_at": 0.0,
+        "rest_duration": 45,
+        "configured_rest_duration": 45,
+
+        # Workout Session Tracking & Reports
+        "workout_started_at": 0.0,
+        "correct_form_reps": 0,
+        "last_session_report": None,
     }
 
     for key, value in defaults.items():
