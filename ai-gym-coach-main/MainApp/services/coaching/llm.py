@@ -7,17 +7,11 @@ class LLMCoach:
         self.history = []
         self.system_prompt = PROMPT
 
- def give_feedback(self, event, issue=None):
+    def give_feedback(self, event, issue=None):
         prompt = f"Event: {event}"
         if issue:
             prompt += f" | Issue: {issue}"
 
-        messages = [
-            {"role": "system", "content": "You are an encouraging, energetic AI gym coach. Give very short, punchy 1-sentence real-time voice feedback."},
-            {"role": "user", "content": prompt}
-        ]
-
-        # 1. Fallback default responses agar API fail ho
         fallback_responses = {
             "workout_started": "Workout started! Focus on your form and keep a steady pace.",
             "rep_completed": "Good rep! Keep your core tight.",
@@ -26,18 +20,25 @@ class LLMCoach:
         }
         default_reply = fallback_responses.get(event, "Keep going, you're doing great!")
 
-        # 2. Try calling Groq API safely
+        if not self.client:
+            return default_reply
+
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            *self.history[-4:],
+            {"role": "user", "content": prompt}
+        ]
+
         try:
-            # First try llama3-8b-8192, if fails fallback to safe string
             response = self.client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="llama-3.1-8b-instant",
                 messages=messages,
                 temperature=0.4,
                 max_tokens=60
             )
             text = response.choices[0].message.content.strip()
+            self.history.append({"role": "user", "content": prompt})
+            self.history.append({"role": "assistant", "content": text})
             return text
         except Exception:
-            # Agar Groq API 404 ya connection error de, app crash nahi hoga
             return default_reply
-    
