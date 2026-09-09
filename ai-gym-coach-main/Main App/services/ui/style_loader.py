@@ -4,20 +4,45 @@ import streamlit.components.v1 as components
 import base64
  
 
+from pathlib import Path
+
+
+def _resolve_asset_path(file_path):
+    p = Path(file_path)
+    if p.is_file():
+        return p
+
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    candidate = base_dir / "static" / p.name
+    if candidate.is_file():
+        return candidate
+
+    candidate2 = Path.cwd() / "static" / p.name
+    if candidate2.is_file():
+        return candidate2
+
+    for found in Path.cwd().rglob(p.name):
+        if found.is_file():
+            return found
+    return p
+
+
 def load_css(file_path):
-    if os.path.exists(file_path):
-        with open(file_path) as f:
+    resolved = _resolve_asset_path(file_path)
+    if resolved.is_file():
+        with open(resolved, "r", encoding="utf-8") as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
 def inject_local_font(font_path, font_name):
-    if not os.path.exists(font_path):
+    resolved = _resolve_asset_path(font_path)
+    if not resolved.is_file():
         return
     
-    with open(font_path, "rb") as f:
+    with open(resolved, "rb") as f:
         encoded = base64.b64encode(f.read()).decode()
 
-    ext = os.path.splitext(font_path)[1].lstrip(".")
+    ext = resolved.suffix.lstrip(".")
     fmt = {"otf": "opentype"}.get(ext, ext)
     mime = {"otf": "font/otf"}.get(ext, f"font/{ext}")
 
@@ -33,9 +58,8 @@ def inject_local_font(font_path, font_name):
     """, unsafe_allow_html=True)
 
 def inject_webrtc_styles():
-    font_path = os.path.join(os.getcwd(), "static", "AdobeClean.otf")
-    
-    if not os.path.exists(font_path):
+    font_path = _resolve_asset_path("AdobeClean.otf")
+    if not font_path.is_file():
         return
 
     with open(font_path, "rb") as font_file:

@@ -1,3 +1,11 @@
+import sys
+from pathlib import Path
+
+# Guarantee MainApp directory is in sys.path for robust imports across all environments
+MAINAPP_DIR = Path(__file__).resolve().parent
+if str(MAINAPP_DIR) not in sys.path:
+    sys.path.insert(0, str(MAINAPP_DIR))
+
 import streamlit as st
 import os
 import time
@@ -25,8 +33,10 @@ def main():
         layout="centered"
     )
 
-    load_css(os.path.join(os.getcwd(), "static", "style.css"))
-    inject_local_font(os.path.join(os.getcwd(), "static", "AdobeClean.otf"), "AdobeClean")
+    css_path = MAINAPP_DIR / "static" / "style.css"
+    font_path = MAINAPP_DIR / "static" / "AdobeClean.otf"
+    load_css(str(css_path))
+    inject_local_font(str(font_path), "AdobeClean")
 
     init_db()
 
@@ -201,7 +211,14 @@ def main():
             key="exercise-analysis",
             mode=WebRtcMode.SENDRECV,
             video_processor_factory=VideoProcessorClass,
-            rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+            rtc_configuration={
+                "iceServers": [
+                    {"urls": ["stun:stun.l.google.com:19302"]},
+                    {"urls": ["stun:stun1.l.google.com:19302"]},
+                    {"urls": ["stun:stun2.l.google.com:19302"]},
+                    {"urls": ["stun:global.stun.twilio.com:3478"]}
+                ]
+            },
             media_stream_constraints={
                 "video": True,
                 "audio": False

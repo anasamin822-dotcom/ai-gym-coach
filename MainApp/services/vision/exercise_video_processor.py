@@ -15,13 +15,55 @@ from detectors.lunges import LungesDetector
 from services.config.workout_config import POSE_CONNECTIONS
 
 
+from pathlib import Path
+import urllib.request
+
+
+def resolve_model_path():
+    # 1. Look relative to this module: MainApp/ml_models/pose_landmarker_full.task
+    base_dir = Path(__file__).resolve().parent.parent.parent
+    candidate = base_dir / "ml_models" / "pose_landmarker_full.task"
+    if candidate.is_file():
+        return str(candidate)
+
+    # 2. Look in common relative paths from working directory
+    search_paths = [
+        Path.cwd() / "ml_models" / "pose_landmarker_full.task",
+        Path.cwd() / "ai-gym-coach-main" / "MainApp" / "ml_models" / "pose_landmarker_full.task",
+        Path.cwd() / "ai-gym-coach-main" / "Main App" / "ml_models" / "pose_landmarker_full.task",
+        Path.cwd() / "MainApp" / "ml_models" / "pose_landmarker_full.task",
+    ]
+    for p in search_paths:
+        if p.is_file():
+            return str(p)
+
+    # 3. Search directory tree
+    for p in Path.cwd().rglob("pose_landmarker_full.task"):
+        if p.is_file():
+            return str(p)
+
+    # 4. Fallback: auto-download from official MediaPipe repository
+    target_dir = base_dir / "ml_models"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target_file = target_dir / "pose_landmarker_full.task"
+    url = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task"
+    try:
+        urllib.request.urlretrieve(url, str(target_file))
+        if target_file.is_file():
+            return str(target_file)
+    except Exception:
+        pass
+
+    return str(candidate)
+
+
 class VideoProcessorClass(VideoProcessorBase):
     def __init__(self):
         self._lock = threading.Lock()
         self._latest_metrics = None
         self._exercise_type = "Squats"
 
-        model_path = os.path.join(os.getcwd(), "ml_models", "pose_landmarker_full.task")
+        model_path = resolve_model_path()
         base_option = python.BaseOptions(model_asset_path=model_path)
 
         options = vision.PoseLandmarkerOptions(
