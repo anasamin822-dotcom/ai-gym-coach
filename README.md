@@ -7,10 +7,11 @@
 [![Groq Llama-3](https://img.shields.io/badge/Groq-Llama--3%20Ultra--Low%20Latency-F55036?logo=groq&logoColor=white)](https://groq.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-Local%20Persistence-003B57?logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Landing Page](https://img.shields.io/badge/Landing%20Page-Live-00F59B?logo=githubpages&logoColor=white)](https://anasamin822-dotcom.github.io/ai-gym-coach/)
 
 > **Empowering solo athletes with computer-vision kinematic joint analysis, real-time muscular fatigue detection, live XP combo gamification, and sub-second LLM voice coaching.**
 
-[🚀 **Launch Live Demo on Streamlit Cloud**](https://ai-gym-coach.streamlit.app/) • [📑 **Architecture Overview**](#-system-architecture) • [⚡ **Hackathon Innovations**](#-hackathon-winning-innovations) • [💻 **Local Setup**](#-installation--local-setup)
+[🌐 **Visit Live Landing Page**](https://anasamin822-dotcom.github.io/ai-gym-coach/) • [🚀 **Launch Live App on Streamlit Cloud**](https://ai-gym-coach.streamlit.app/) • [📑 **Architecture Overview**](#-system-architecture) • [⚡ **Hackathon Innovations**](#-hackathon-winning-innovations) • [💻 **Local Setup**](#-installation--local-setup)
 
 ---
 
