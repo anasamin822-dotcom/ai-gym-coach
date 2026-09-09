@@ -176,8 +176,22 @@ def main():
                 st.metric("Torso Angle", f"{st.session_state.torso_angle}°")
                 st.metric("Balance Status", st.session_state.balance_status)
 
-    st.title("AI Real-time GYM Coach")
-    st.markdown("#### Real-time pose detection with proactive AI voice coaching")
+    st.markdown(
+        """
+        <div style="margin-bottom: 20px;">
+            <div class="gym-hero-badge">
+                <span class="gym-status-dot"></span> AI BIOMECHANICAL VISION ENGINE ONLINE
+            </div>
+            <h1 style="margin: 0; font-size: 2.3rem; font-weight: 900; letter-spacing: -0.02em;">
+                ⚡ APNA AI GYM COACH
+            </h1>
+            <p style="color: #94A3B8; font-size: 1.02rem; margin-top: 6px; margin-bottom: 0;">
+                Real-time 33-Point Pose Tracking • Biomechanical Form Verification • Certified Workout & Diet Planner
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
  
     if st.session_state.get("audio_to_play"):
         autoplay_audio(st.session_state.audio_to_play)
@@ -197,19 +211,28 @@ def main():
             st.markdown(
                 """
                 <div style="
-                    border: 10px dashed #444;
-                    border-radius: 0px;
-                    padding: 48px 32px;
+                    background: linear-gradient(145deg, rgba(14, 20, 34, 0.9) 0%, rgba(8, 12, 22, 0.95) 100%);
+                    border: 1px solid rgba(0, 245, 155, 0.3);
+                    border-radius: 16px;
+                    padding: 38px 28px;
                     text-align: center;
-                    color: #888;
-                    margin-top: 32px;
-                    margin-bottom: 32px;
+                    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55);
+                    margin: 24px 0;
                 ">
-                    <h2 style="color:#ccc; margin-bottom:8px;">👈 Set your workout plan</h2>
-                    <p style="font-size:1.05rem;">
-                        Choose your exercise, sets and reps in the sidebar,<br>
-                        then click <strong>Start Workout</strong> to activate the camera and AI coach.
+                    <div style="font-size: 3.5rem; margin-bottom: 10px;">🏋️‍♂️</div>
+                    <h2 style="color: #FFFFFF; font-size: 1.65rem; margin-bottom: 8px; font-weight: 800;">
+                        AI WORKOUT ARENA • READY
+                    </h2>
+                    <p style="color: #94A3B8; font-size: 1.02rem; max-width: 620px; margin: 0 auto 24px auto;">
+                        Choose your exercise and target reps in the sidebar, then click <strong style="color: #00F59B;">Start Workout</strong> to activate camera telemetry and voice coaching.
                     </p>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+                        <span style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); color: #00F59B; padding: 7px 15px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">🦵 Squats</span>
+                        <span style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); color: #00F59B; padding: 7px 15px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">💪 Push-ups</span>
+                        <span style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); color: #00F59B; padding: 7px 15px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">🏋️ Biceps Curls</span>
+                        <span style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); color: #00F59B; padding: 7px 15px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">🎯 Shoulder Press</span>
+                        <span style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); color: #00F59B; padding: 7px 15px; border-radius: 8px; font-size: 0.88rem; font-weight: 600;">🏃 Lunges</span>
+                    </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
