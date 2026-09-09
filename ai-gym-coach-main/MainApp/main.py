@@ -113,6 +113,19 @@ def main():
                 st.session_state.is_resting = False
                 st.session_state.last_session_report = None
 
+                # Reset Hackathon Telemetry: Combo Streak & Velocity Engine
+                st.session_state.combo_streak = 0
+                st.session_state.max_combo_streak = 0
+                st.session_state.combo_multiplier = 1.0
+                st.session_state.live_xp = 0
+                st.session_state.rep_durations = []
+                st.session_state.current_rep_velocity = 0.0
+                st.session_state.baseline_rep_velocity = 0.0
+                st.session_state.velocity_drop_pct = 0.0
+                st.session_state.fatigue_detected = False
+                st.session_state.total_fatigue_events = 0
+                st.session_state.last_rep_timestamp = 0.0
+
                 if st.session_state.voice_pipeline:
                     result = st.session_state.voice_pipeline.process_event(
                         event="workout_started",
@@ -141,14 +154,17 @@ def main():
                 sets_done = st.session_state.get("sets_completed", 0)
                 user_name = st.session_state.get("username", "Athlete")
 
-                # Generate clean workout report for export
+                # Generate clean workout report for export with all telemetry
                 report = calculate_session_metrics(
                     exercise=exercise,
                     sets_completed=sets_done,
                     total_reps=total_reps,
                     duration_seconds=duration_sec,
                     correct_form_reps=st.session_state.get("correct_form_reps", total_reps),
-                    username=user_name
+                    username=user_name,
+                    max_combo_streak=st.session_state.get("max_combo_streak", 0),
+                    total_fatigue_events=st.session_state.get("total_fatigue_events", 0),
+                    rep_durations=st.session_state.get("rep_durations", [])
                 )
                 st.session_state.last_session_report = report
                 st.session_state.workout_started = False
@@ -284,6 +300,45 @@ def main():
                 unsafe_allow_html=True,
             )
         else:
+            # --- HACKATHON LIVE TELEMETRY: XP Combo Streak & Rep Velocity Meter ---
+            combo = st.session_state.get("combo_streak", 0)
+            multiplier = st.session_state.get("combo_multiplier", 1.0)
+            live_xp = st.session_state.get("live_xp", 0)
+            velocity = st.session_state.get("current_rep_velocity", 0.0)
+            fatigue = st.session_state.get("fatigue_detected", False)
+            velocity_drop = st.session_state.get("velocity_drop_pct", 0.0)
+
+            hud_col1, hud_col2, hud_col3 = st.columns([1, 1, 1])
+            with hud_col1:
+                if combo >= 5:
+                    combo_badge = f"🔥 {combo}x COMBO ({multiplier:.1f}x XP)"
+                elif combo >= 3:
+                    combo_badge = f"⚡ {combo}x COMBO ({multiplier:.1f}x XP)"
+                elif combo > 0:
+                    combo_badge = f"✨ {combo}x STREAK"
+                else:
+                    combo_badge = "🎯 PERFECT FORM = XP"
+                st.metric(label="Combo Streak", value=combo_badge, delta=f"+{live_xp} Total XP")
+
+            with hud_col2:
+                if fatigue:
+                    vel_val = f"⚠️ {velocity:.1f}s ({velocity_drop:.0f}% DROP)"
+                    delta_txt = "Muscular Fatigue Alert"
+                elif velocity > 0:
+                    vel_val = f"⚡ {velocity:.1f}s / rep"
+                    delta_txt = "Optimal Tempo"
+                else:
+                    vel_val = "Calibrating..."
+                    delta_txt = "Pace Tracking"
+                st.metric(label="Rep Velocity / Cadence", value=vel_val, delta=delta_txt, delta_color="inverse" if fatigue else "normal")
+
+            with hud_col3:
+                curr_reps = st.session_state.get("current_set_reps", 0)
+                reps_target = st.session_state.get("reps_per_set", 10)
+                curr_set = st.session_state.get("sets_completed", 0) + 1
+                tot_sets = st.session_state.get("target_sets", 3)
+                st.metric(label="Set Cadence", value=f"Set {curr_set} / {tot_sets}", delta=f"{curr_reps} of {reps_target} Reps")
+
             context = webrtc_streamer(
                 key="exercise-analysis",
                 mode=WebRtcMode.SENDRECV,
@@ -319,7 +374,10 @@ def main():
                     total_reps=total_reps,
                     duration_seconds=duration_sec,
                     correct_form_reps=st.session_state.get("correct_form_reps", total_reps),
-                    username=user_name
+                    username=user_name,
+                    max_combo_streak=st.session_state.get("max_combo_streak", 0),
+                    total_fatigue_events=st.session_state.get("total_fatigue_events", 0),
+                    rep_durations=st.session_state.get("rep_durations", [])
                 )
                 st.session_state.workout_started = False
                 st.session_state.is_resting = False

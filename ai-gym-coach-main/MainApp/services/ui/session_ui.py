@@ -1,10 +1,10 @@
-﻿"""
+"""
 Workout Session UI Components:
-1. Automatic Rest Countdown Timer with audio transitions and Skip button.
-2. Workout Summary Export Card with pure Python PDF & CSV downloads.
+1. Smart Rest Countdown Timer with SVG Ring, audio transitions, and Skip button.
+2. Workout Summary Export Card with styled PDF & CSV downloads.
 """
 import time
-import json
+import math
 import streamlit as st
 import streamlit.components.v1 as components
 from services.reporting.workout_report import (
@@ -45,7 +45,7 @@ def play_rest_chime():
 
 def render_rest_timer_overlay(render_voice_feedback_func=None):
     """
-    Renders an interactive athletic countdown timer between workout sets.
+    Renders an interactive athletic countdown timer between workout sets with an SVG countdown ring.
     Transitions back to active workout when time expires or when Skip is clicked.
     """
     if not st.session_state.get("is_resting", False):
@@ -61,34 +61,45 @@ def render_rest_timer_overlay(render_voice_feedback_func=None):
     target_sets = st.session_state.get("target_sets", 3)
     next_set = sets_done + 1
 
-    # Visual percentage for countdown
-    progress_pct = max(0, min(100, int((remaining / max(1, duration)) * 100)))
+    # Visual percentage and SVG ring circumference (r=54 -> C = 2 * pi * 54 = 339.29)
+    circumference = 339.29
+    fraction_remaining = max(0.0, min(1.0, remaining / max(1, duration)))
+    stroke_offset = round(circumference * (1.0 - fraction_remaining), 2)
 
     st.markdown(
         f"""
         <div style="
-            background: linear-gradient(145deg, rgba(10, 15, 26, 0.95) 0%, rgba(18, 25, 42, 0.95) 100%);
+            background: linear-gradient(145deg, rgba(10, 15, 26, 0.96) 0%, rgba(18, 25, 42, 0.98) 100%);
             border: 2px solid #00F59B;
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 24px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 245, 155, 0.25);
+            box-shadow: 0 0 35px rgba(0, 245, 155, 0.28);
             margin: 16px 0 24px 0;
         ">
-            <div style="display: inline-block; background: rgba(0, 245, 155, 0.15); border: 1px solid #00F59B; color: #00F59B; padding: 4px 14px; border-radius: 9999px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px;">
-                🧘 SET {sets_done} COMPLETED • RECOVERY INTERVAL
+            <div style="display: inline-block; background: rgba(0, 245, 155, 0.15); border: 1px solid #00F59B; color: #00F59B; padding: 5px 16px; border-radius: 9999px; font-weight: 800; font-size: 0.82rem; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px;">
+                SET {sets_done} COMPLETED • RECOVERY INTERVAL
             </div>
-            <div style="font-size: 3.6rem; font-weight: 900; color: #00F59B; letter-spacing: -0.03em; margin: 4px 0; text-shadow: 0 0 20px rgba(0,245,155,0.4);">
-                {remaining}s
+
+            <!-- Sleek Athletic SVG Countdown Ring -->
+            <div style="position: relative; width: 130px; height: 130px; margin: 0 auto 12px auto;">
+                <svg width="130" height="130" viewBox="0 0 130 130" style="display: block;">
+                    <circle cx="65" cy="65" r="54" stroke="rgba(255,255,255,0.08)" stroke-width="8" fill="none" />
+                    <circle cx="65" cy="65" r="54" stroke="#00F59B" stroke-width="8" fill="none"
+                            stroke-linecap="round"
+                            stroke-dasharray="339.29"
+                            stroke-dashoffset="{stroke_offset}"
+                            style="transition: stroke-dashoffset 0.85s linear; filter: drop-shadow(0 0 10px rgba(0,245,155,0.6));"
+                            transform="rotate(-90 65 65)" />
+                    <text x="65" y="73" text-anchor="middle" fill="#00F59B" font-size="28" font-weight="900" font-family="sans-serif">{remaining}s</text>
+                </svg>
             </div>
-            <div style="color: #E2E8F0; font-size: 1.05rem; font-weight: 600; margin-bottom: 4px;">
+
+            <div style="color: #E2E8F0; font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;">
                 Hydrate & Catch Your Breath
             </div>
-            <div style="color: #94A3B8; font-size: 0.9rem; margin-bottom: 16px;">
-                Next Up: <strong>Set {next_set} of {target_sets}</strong>
-            </div>
-            <div style="background: rgba(255,255,255,0.08); height: 8px; border-radius: 4px; overflow: hidden; width: 80%; margin: 0 auto 12px auto;">
-                <div style="background: linear-gradient(90deg, #00F59B, #00E5FF); height: 100%; width: {progress_pct}%; transition: width 0.9s linear;"></div>
+            <div style="color: #94A3B8; font-size: 0.92rem; margin-bottom: 16px;">
+                Next Up: <strong style="color: #00F59B;">Set {next_set} of {target_sets}</strong>
             </div>
         </div>
         """,
@@ -105,7 +116,7 @@ def render_rest_timer_overlay(render_voice_feedback_func=None):
             st.session_state.rest_duration = max(10, duration - 15)
             st.rerun()
     with col_t3:
-        skip_clicked = st.button("⚡ Skip Rest & Begin Set", key="btn_skip_rest", use_container_width=True)
+        skip_clicked = st.button("Skip Rest & Begin Set", key="btn_skip_rest", use_container_width=True)
 
     # Trigger conclusion when time finishes or user clicks Skip
     if remaining <= 0 or skip_clicked:
@@ -122,7 +133,7 @@ def render_rest_timer_overlay(render_voice_feedback_func=None):
 
 def render_workout_summary_section(metrics: dict):
     """
-    Displays an aesthetic summary card with XP badge and CSV/PDF export buttons.
+    Displays an aesthetic summary card with XP badge, symmetry metrics, and CSV/PDF export buttons.
     """
     if not metrics:
         return
@@ -140,10 +151,10 @@ def render_workout_summary_section(metrics: dict):
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
                 <div>
                     <span style="background: rgba(0, 245, 155, 0.12); border: 1px solid #00F59B; color: #00F59B; padding: 4px 12px; border-radius: 9999px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase;">
-                        WORKOUT COMPLETE
+                        WORKOUT COMPLETE • HACKATHON AUDIT READY
                     </span>
                     <h2 style="margin: 8px 0 2px 0; color: #FFFFFF; font-size: 1.8rem; font-weight: 800;">
-                        🏆 {metrics['exercise']} Session Highlights
+                        {metrics['exercise']} Session Highlights
                     </h2>
                     <span style="color: #94A3B8; font-size: 0.9rem;">Completed on {metrics['date']}</span>
                 </div>
@@ -164,8 +175,15 @@ def render_workout_summary_section(metrics: dict):
     c3.metric("Avg Rep Tempo", f"{metrics['avg_tempo_sec']} s/rep")
     c4.metric("Form Accuracy", f"{metrics['form_accuracy_pct']}%")
 
-    st.markdown("#### 📥 Export Workout Session Report")
-    st.caption("Download your certified session report for offline fitness tracking, logs, or sharing.")
+    # Innovation Row: Combo, Symmetry, Fatigue
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("Max Combo Streak", f"{metrics.get('max_combo_streak', 0)} Reps", delta="Live XP Multiplier")
+    m2.metric("Joint Symmetry", f"{metrics.get('joint_symmetry_pct', 95.0)}%", delta="Kinematic Balance")
+    m3.metric("Fatigue Resilience", f"{metrics.get('fatigue_resistance_score', 95)}%", delta=f"{metrics.get('total_fatigue_events', 0)} Alerts")
+    m4.metric("Velocity Spread", f"{metrics.get('peak_velocity_s', 0.0)}s", delta=f"Drop: {metrics.get('fatigue_drop_pct', 0.0)}%")
+
+    st.markdown("#### Export Workout Session Report")
+    st.caption("Download your certified session report for offline fitness tracking, logs, or hackathon review.")
 
     csv_data = generate_workout_csv(metrics)
     pdf_data = generate_workout_pdf(metrics)
@@ -173,7 +191,7 @@ def render_workout_summary_section(metrics: dict):
     dl_col1, dl_col2 = st.columns(2)
     with dl_col1:
         st.download_button(
-            label="📊 Download Report (CSV)",
+            label="Download Report (CSV)",
             data=csv_data,
             file_name=f"workout_{metrics['exercise'].lower().replace(' ', '_')}_{int(time.time())}.csv",
             mime="text/csv",
@@ -182,7 +200,7 @@ def render_workout_summary_section(metrics: dict):
         )
     with dl_col2:
         st.download_button(
-            label="📄 Download Official PDF Report",
+            label="Download Official PDF Report",
             data=pdf_data,
             file_name=f"workout_report_{metrics['exercise'].lower().replace(' ', '_')}_{int(time.time())}.pdf",
             mime="application/pdf",

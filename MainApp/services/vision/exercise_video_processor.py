@@ -86,6 +86,10 @@ class VideoProcessorClass(VideoProcessorBase):
         }
 
         self._frame_timestamps_ms = 0
+        self._combo_streak = 0
+        self._combo_multiplier = 1.0
+        self._rep_velocity = 0.0
+        self._fatigue_detected = False
     
     def set_latest_metrics(self, metrics):
         with self._lock:
@@ -102,6 +106,49 @@ class VideoProcessorClass(VideoProcessorBase):
     def get_exercise(self):
         with self._lock:
             return self._exercise_type
+
+    def set_hud_telemetry(self, combo, multiplier, velocity, fatigue):
+        with self._lock:
+            self._combo_streak = int(combo)
+            self._combo_multiplier = float(multiplier)
+            self._rep_velocity = float(velocity)
+            self._fatigue_detected = bool(fatigue)
+
+    def _draw_cyber_hud(self, img):
+        h, w = img.shape[:2]
+        with self._lock:
+            combo = getattr(self, "_combo_streak", 0)
+            multiplier = getattr(self, "_combo_multiplier", 1.0)
+            velocity = getattr(self, "_rep_velocity", 0.0)
+            fatigue = getattr(self, "_fatigue_detected", False)
+
+        # Top-Right: Combo Streak & Multiplier
+        if combo > 0:
+            combo_txt = f"COMBO {combo}x ({multiplier:.1f}x XP)"
+            txt_size = cv2.getTextSize(combo_txt, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)[0]
+            tx = max(10, w - txt_size[0] - 25)
+            cv2.rectangle(img, (tx - 10, 15), (tx + txt_size[0] + 10, 50), (10, 15, 26), -1)
+            accent_color = (0, 245, 155) if multiplier < 2.0 else (0, 215, 255)
+            if multiplier >= 3.0:
+                accent_color = (0, 140, 255)
+            cv2.rectangle(img, (tx - 10, 15), (tx + txt_size[0] + 10, 50), accent_color, 1)
+            cv2.putText(img, combo_txt, (tx, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.7, accent_color, 2, cv2.LINE_AA)
+
+        # Top-Left: Velocity / Fatigue Meter
+        if velocity > 0:
+            if fatigue:
+                status_txt = f"FATIGUE: {velocity:.1f}s/rep"
+                border_color = (0, 0, 255)
+                text_color = (0, 100, 255)
+            else:
+                status_txt = f"CADENCE: {velocity:.1f}s"
+                border_color = (0, 245, 155)
+                text_color = (0, 245, 155)
+
+            s_size = cv2.getTextSize(status_txt, cv2.FONT_HERSHEY_SIMPLEX, 0.65, 2)[0]
+            cv2.rectangle(img, (15, 15), (25 + s_size[0] + 5, 50), (10, 15, 26), -1)
+            cv2.rectangle(img, (15, 15), (25 + s_size[0] + 5, 50), border_color, 1)
+            cv2.putText(img, status_txt, (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.65, text_color, 2, cv2.LINE_AA)
         
     def _draw_skeleton(self, img, landmarks):
         h, w = img.shape[:2]
@@ -269,6 +316,8 @@ class VideoProcessorClass(VideoProcessorBase):
                     self._latest_metrics["pose_detected"] = False
                 else:
                     self._latest_metrics = {"pose_detected": False}
+
+        self._draw_cyber_hud(image)
 
         return av.VideoFrame.from_ndarray(image, format="bgr24")
     

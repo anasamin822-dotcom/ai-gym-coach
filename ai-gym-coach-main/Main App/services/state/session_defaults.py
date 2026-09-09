@@ -48,6 +48,20 @@ def initial_session_defaults():
         "workout_started_at": 0.0,
         "correct_form_reps": 0,
         "last_session_report": None,
+
+        # Hackathon Innovations: Live XP Combo & Velocity Fatigue Engine
+        "combo_streak": 0,
+        "max_combo_streak": 0,
+        "combo_multiplier": 1.0,
+        "live_xp": 0,
+        "last_rep_timestamp": 0.0,
+        "rep_durations": [],
+        "current_rep_velocity": 0.0,
+        "baseline_rep_velocity": 0.0,
+        "velocity_drop_pct": 0.0,
+        "fatigue_detected": False,
+        "total_fatigue_events": 0,
+        "last_form_status": "OPTIMAL",
     }
 
     for key, value in defaults.items():

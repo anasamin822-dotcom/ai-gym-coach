@@ -1,4 +1,4 @@
-﻿"""
+"""
 Gym Trainer Nutrition & Workout Planner Service
 Calculates BMI, BMR, TDEE, Macros, and generates tailored gym-grade meal plans and workout splits.
 """

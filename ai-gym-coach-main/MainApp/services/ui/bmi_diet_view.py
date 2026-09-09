@@ -1,4 +1,4 @@
-﻿"""
+"""
 Gym Trainer BMI, Diet & Routine View Component for Streamlit
 High-Impact Athletic UI for Hackathon Demonstrations
 """
