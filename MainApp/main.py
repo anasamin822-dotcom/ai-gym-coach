@@ -18,7 +18,8 @@ from services.persistence.exercise_repository import init_db
 from streamlit_webrtc import webrtc_streamer, WebRtcMode
 from services.vision.exercise_video_processor import VideoProcessorClass
 from services.tracking.metrics import sync_metrics_update
-from services.persistence.exercise_repository import get_users_exercises
+from services.persistence.exercise_repository import get_users_exercises, calculate_subscription_status, get_user_payments
+from services.payment.upi_engine import render_upi_payment_modal
 from groq import Groq
 from services.coaching.llm import LLMCoach
 from services.coaching.tts import TextToSpeech
@@ -67,8 +68,26 @@ def main():
     with st.sidebar:
         st.title("🏋️‍♂️ Apna AI Coach")
 
+        u_id = st.session_state.get("user_id", 0)
+        sub_stat = calculate_subscription_status(u_id) if u_id else {}
+        is_pro = sub_stat.get("is_pro", False)
+        badge_text = sub_stat.get("badge_text", "7-Day Free Trial")
+        badge_color = sub_stat.get("badge_color", "#38BDF8")
+
         if st.session_state.username:
-            st.caption(f"👤 Login as {st.session_state.username}")
+            phone_lbl = f" (+91 {st.session_state.get('phone_number')})" if st.session_state.get('phone_number') else ""
+            st.caption(f"👤 {st.session_state.username}{phone_lbl}")
+
+        st.markdown(f'''
+            <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid {badge_color}; border-radius: 8px; padding: 7px 12px; margin: 6px 0 12px 0; display: flex; align-items: center; justify-content: space-between;">
+                <span style="color: {badge_color}; font-weight: 800; font-size: 11px;">{badge_text}</span>
+                <span style="font-size: 13px;">{"👑" if is_pro else "⚡"}</span>
+            </div>
+        ''', unsafe_allow_html=True)
+
+        if not is_pro:
+            with st.expander("⚡ Upgrade via UPI QR Code", expanded=False):
+                render_upi_payment_modal(u_id)
 
         st.divider()
 
@@ -253,10 +272,11 @@ def main():
         st.markdown("")
         st.success(f"🤖 **Coach:** {st.session_state.coach_feedback}")
 
-    tab_workout, tab_diet, tab_history = st.tabs([
+    tab_workout, tab_diet, tab_history, tab_pro = st.tabs([
         "🏋️‍♂️ Live Workout & AI Coach",
         "🥗 BMI & Diet Planner",
-        "📈 Workout History"
+        "📈 Workout History",
+        "👑 Pro Athlete & UPI Pay"
     ])
 
     with tab_workout:
@@ -434,6 +454,57 @@ def main():
                 )
             else:
                 st.info("No workout history found.")
+
+
+    with tab_pro:
+        st.markdown("### 👑 Pro Athlete & Subscription Hub")
+        user_id_pro = st.session_state.get("user_id", 0)
+        phone_pro = st.session_state.get("phone_number", "Registered User")
+        sub_info = calculate_subscription_status(user_id_pro) if user_id_pro else {}
+        is_pro_active = sub_info.get("is_pro", False)
+
+        col_st1, col_st2 = st.columns([2, 1])
+        with col_st1:
+            st.markdown(f'''
+                <div style="background: rgba(14, 20, 34, 0.95); border: 1px solid {sub_info.get('badge_color', '#00F59B')}; border-radius: 12px; padding: 18px; margin-bottom: 18px;">
+                    <div style="color: {sub_info.get('badge_color', '#00F59B')}; font-weight: 800; font-size: 12px; text-transform: uppercase;">
+                        CURRENT PLAN: {sub_info.get('badge_text', 'Free Starter')}
+                    </div>
+                    <div style="color: #FFFFFF; font-size: 18px; font-weight: 800; margin-top: 4px;">
+                        Member: +91 {phone_pro}
+                    </div>
+                    <div style="color: #94A3B8; font-size: 13px; margin-top: 4px;">
+                        {"All Olympic-Grade Biomechanical Voice & Analytics features unlocked." if is_pro_active else f"You have {sub_info.get('trial_days_left', 7)} days left in your 7-Day Free Starter Trial."}
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
+        with col_st2:
+            st.markdown(f'''
+                <div style="background: rgba(0, 245, 155, 0.08); border: 1px solid rgba(0, 245, 155, 0.3); border-radius: 12px; padding: 18px; text-align: center;">
+                    <div style="font-size: 32px;">{"👑" if is_pro_active else "🎁"}</div>
+                    <div style="color: #00F59B; font-weight: 800; font-size: 13px; margin-top: 4px;">
+                        {"PRO ACTIVE" if is_pro_active else "7-DAY TRIAL"}
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
+
+        render_upi_payment_modal(user_id_pro)
+
+        # Payment audit log
+        user_payments = get_user_payments(user_id_pro) if user_id_pro else []
+        if user_payments:
+            st.markdown("#### 📜 Payment & UTR Transaction Records")
+            records = [
+                {
+                    "Plan": p["plan_name"],
+                    "Amount (INR)": f"₹{p['amount']:.0f}",
+                    "UTR / Ref No.": p["utr_number"],
+                    "Status": p["status"],
+                    "Date": p["created_at"]
+                }
+                for p in user_payments
+            ]
+            st.dataframe(pd.DataFrame(records), use_container_width=True)
 
 
 if __name__ == "__main__":

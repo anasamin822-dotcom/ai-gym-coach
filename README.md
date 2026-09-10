@@ -7,9 +7,10 @@
 [![Groq Llama-3](https://img.shields.io/badge/Groq-Llama--3%20Ultra--Low%20Latency-F55036?logo=groq&logoColor=white)](https://groq.com/)
 [![SQLite](https://img.shields.io/badge/SQLite-Local%20Persistence-003B57?logo=sqlite&logoColor=white)](https://sqlite.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Instant UPI QR](https://img.shields.io/badge/Payments-Instant%20UPI%20QR-00F59B?logo=googlepay&logoColor=white)](https://ai-gym-coach-bndhslamytm6wpyg5beqeo.streamlit.app/)
 [![Live Landing Page](https://img.shields.io/badge/Landing%20Page-Live-00F59B?logo=githubpages&logoColor=white)](https://anasamin822-dotcom.github.io/ai-gym-coach/)
 
-> **Empowering solo athletes with computer-vision kinematic joint analysis, real-time muscular fatigue detection, live XP combo gamification, and sub-second LLM voice coaching.**
+> **Empowering solo athletes with computer-vision kinematic joint analysis, real-time muscular fatigue detection, live XP combo gamification, sub-second LLM voice coaching, and instant dynamic UPI checkout.**
 
 [🌐 **Visit Live Landing Page**](https://anasamin822-dotcom.github.io/ai-gym-coach/) • [🚀 **Launch Live App on Streamlit Cloud**](https://ai-gym-coach-bndhslamytm6wpyg5beqeo.streamlit.app/) • [📑 **Architecture Overview**](#-system-architecture) • [⚡ **Hackathon Innovations**](#-hackathon-winning-innovations) • [💻 **Local Setup**](#-installation--local-setup)
 
@@ -49,6 +50,12 @@ Traditional fitness apps either rely on manual logging (which is inaccurate and 
 - Generates a certified single-page vector PDF workout report powered by `fpdf2`.
 - Formats kinematic accuracy, bilateral joint symmetry, rep cadence, fatigue resistance scores, and XP tier badges.
 - Includes clean CSV exports for offline fitness logging.
+
+### 6. 📱 Mobile OTP Auth & Instant Dynamic UPI QR Payments
+- Frictionless 10-digit mobile number login with OTP verification (Fast2SMS/Twilio carrier integration + resilient sandbox fallback).
+- Automatic **7-Day Free Starter Trial** activation with live remaining-days counter.
+- Instant Dynamic UPI QR Code generator supporting PhonePe, Google Pay, Paytm, and BHIM with NPCI intent links.
+- 12-digit UTR reference validation for instant **Pro Athlete** feature unlocking.
 
 ---
 
