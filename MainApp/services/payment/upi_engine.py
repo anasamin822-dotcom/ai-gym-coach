@@ -73,9 +73,10 @@ def get_qr_image_url(upi_intent: str, size: int = 240) -> str:
     return f"https://api.qrserver.com/v1/create-qr-code/?size={size}x{size}&margin=10&data={encoded_data}"
 
 
-def render_upi_payment_modal(user_id: int):
+def render_upi_payment_modal(user_id: int, key_prefix: str = "main"):
     """
     Renders an interactive Cyberpunk Dynamic UPI QR Code payment drawer.
+    Uses key_prefix to guarantee unique element keys across multiple instances.
     """
     st.markdown("""
         <div style="background: linear-gradient(135deg, rgba(10, 25, 47, 0.95), rgba(15, 23, 42, 0.95)); border: 1px solid #00F59B; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
@@ -94,32 +95,32 @@ def render_upi_payment_modal(user_id: int):
 
     # Select Plan
     col_p1, col_p2, col_p3 = st.columns(3)
-    plan_keys = list(PLANS.keys())
     
-    if "selected_plan" not in st.session_state:
-        st.session_state["selected_plan"] = "pro_monthly"
+    plan_state_key = f"{key_prefix}_selected_plan"
+    if plan_state_key not in st.session_state:
+        st.session_state[plan_state_key] = "pro_monthly"
 
     with col_p1:
-        is_sel = st.session_state["selected_plan"] == "day_pass"
-        if st.button("🔥 Day Pass (₹19)", key="plan_day_pass", type="primary" if is_sel else "secondary", use_container_width=True):
-            st.session_state["selected_plan"] = "day_pass"
+        is_sel = st.session_state[plan_state_key] == "day_pass"
+        if st.button("🔥 Day Pass (₹19)", key=f"{key_prefix}_plan_day_pass", type="primary" if is_sel else "secondary", use_container_width=True):
+            st.session_state[plan_state_key] = "day_pass"
             st.rerun()
 
     with col_p2:
-        is_sel = st.session_state["selected_plan"] == "pro_monthly"
-        if st.button("⭐ Monthly (₹199)", key="plan_monthly", type="primary" if is_sel else "secondary", use_container_width=True):
-            st.session_state["selected_plan"] = "pro_monthly"
+        is_sel = st.session_state[plan_state_key] == "pro_monthly"
+        if st.button("⭐ Monthly (₹199)", key=f"{key_prefix}_plan_monthly", type="primary" if is_sel else "secondary", use_container_width=True):
+            st.session_state[plan_state_key] = "pro_monthly"
             st.rerun()
 
     with col_p3:
-        is_sel = st.session_state["selected_plan"] == "pro_annual"
-        if st.button("👑 Annual (₹1499)", key="plan_annual", type="primary" if is_sel else "secondary", use_container_width=True):
-            st.session_state["selected_plan"] = "pro_annual"
+        is_sel = st.session_state[plan_state_key] == "pro_annual"
+        if st.button("👑 Annual (₹1499)", key=f"{key_prefix}_plan_annual", type="primary" if is_sel else "secondary", use_container_width=True):
+            st.session_state[plan_state_key] = "pro_annual"
             st.rerun()
 
-    selected = PLANS[st.session_state["selected_plan"]]
+    selected = PLANS[st.session_state[plan_state_key]]
     upi_id = get_upi_id()
-    txn_note = f"PRO_{user_id}_{st.session_state['selected_plan']}"
+    txn_note = f"PRO_{user_id}_{st.session_state[plan_state_key]}"
     intent_url = generate_upi_intent_url(upi_id, DEFAULT_PAYEE_NAME, selected["price"], txn_note)
     qr_url = get_qr_image_url(intent_url, size=220)
 
@@ -155,10 +156,10 @@ def render_upi_payment_modal(user_id: int):
 
         col_utr, col_btn = st.columns([1.5, 1])
         with col_utr:
-            utr_input = st.text_input("12-Digit UTR / Ref No.", placeholder="e.g. 423871928374", key="input_utr", label_visibility="collapsed")
+            utr_input = st.text_input("12-Digit UTR / Ref No.", placeholder="e.g. 423871928374", key=f"{key_prefix}_input_utr", label_visibility="collapsed")
         
         with col_btn:
-            if st.button("Verify & Unlock", key="btn_verify_utr", type="primary", use_container_width=True):
+            if st.button("Verify & Unlock", key=f"{key_prefix}_btn_verify_utr", type="primary", use_container_width=True):
                 if not utr_input or len(utr_input.strip()) < 6:
                     st.error("Please enter a valid UPI UTR / Reference ID.")
                 else:
