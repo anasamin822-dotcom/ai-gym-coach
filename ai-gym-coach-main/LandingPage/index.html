@@ -320,110 +320,27 @@
         </div>
       </div>
 
-      <!-- AI Demo Slideshow -->
-      <div id="demo-reel" style="margin: 0 auto 48px auto; max-width: 860px; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,245,155,0.4); box-shadow: 0 0 40px rgba(0,245,155,0.15); background: #060B14; user-select: none;">
-
-        <!-- Slides -->
-        <div id="demo-slides" style="position: relative; height: 480px; overflow: hidden;">
-          <div class="demo-slide active-slide" data-label="🏋️ Real-Time Squat Tracking" data-sub="33 3D Joints · 88° Knee Depth · Perfect Form">
-            <img src="./IMGs/i1.png" alt="Squat Tracking" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-          <div class="demo-slide" data-label="💪 Bicep Curl Pose Tracking" data-sub="45° Elbow Flexion · 5x Combo Streak · 2.0x XP">
-            <img src="./IMGs/i2.png" alt="Bicep Curl" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-          <div class="demo-slide" data-label="⚠️ Fatigue Velocity Engine" data-sub="-35% Concentric Speed Drop · Auto Alert · Stop Injury">
-            <img src="./IMGs/i3.png" alt="Push-Up Fatigue Alert" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-          <div class="demo-slide" data-label="⚡ Shoulder Press + Smart Rest" data-sub="172° Lockout Detected · SVG 45s Rest Ring · Chime">
-            <img src="./IMGs/i4.png" alt="Shoulder Press" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-          <div class="demo-slide" data-label="🎙️ Groq AI Voice Coach" data-sub="Sub-90ms Latency · Real-Time Audio Feedback · Llama 3">
-            <img src="./IMGs/i5.png" alt="Voice Coach" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-          <div class="demo-slide" data-label="📄 Certified Session Report" data-sub="PDF Export · Gold XP Tier · Bilateral Symmetry Score">
-            <img src="./IMGs/i6.png" alt="PDF Report" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          </div>
-        </div>
-
-        <!-- Top HUD -->
-        <div style="position:absolute;top:14px;left:16px;z-index:10;pointer-events:none;">
+      <!-- AI Demo Video Player -->
+      <div style="margin: 0 auto 48px auto; max-width: 860px; position: relative; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,245,155,0.4); box-shadow: 0 0 40px rgba(0,245,155,0.15); background: #060B14;">
+        <video
+          id="demo-video"
+          src="./videos/video.mp4"
+          poster="./IMGs/i1.png"
+          controls
+          playsinline
+          preload="metadata"
+          style="width:100%; display:block; background:#060B14; max-height:500px; object-fit:contain;"
+        >
+          Your browser does not support the video tag.
+        </video>
+        <!-- LIVE DEMO badge -->
+        <div style="position:absolute;top:14px;left:16px;pointer-events:none;">
           <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(0,245,155,0.15);border:1px solid #00F59B;color:#00F59B;font-size:10px;font-weight:800;letter-spacing:0.1em;padding:3px 10px;border-radius:999px;text-transform:uppercase;">
-            <span style="width:6px;height:6px;border-radius:50%;background:#00F59B;box-shadow:0 0 8px #00F59B;animation:pulse-dot 1s infinite;"></span>
+            <span style="width:6px;height:6px;border-radius:50%;background:#00F59B;box-shadow:0 0 8px #00F59B;animation:vdot 1s infinite;"></span>
             LIVE DEMO
           </div>
         </div>
-
-        <!-- Caption overlay -->
-        <div id="demo-caption" style="position:absolute;bottom:0;left:0;right:0;z-index:10;background:linear-gradient(transparent,rgba(6,11,20,0.95));padding:28px 20px 16px;pointer-events:none;">
-          <div id="demo-label" style="font-family:var(--font-display);font-size:17px;font-weight:900;color:#FFFFFF;margin-bottom:4px;">🏋️ Real-Time Squat Tracking</div>
-          <div id="demo-sub" style="font-size:12px;color:#94A3B8;letter-spacing:0.04em;">33 3D Joints · 88° Knee Depth · Perfect Form</div>
-          <!-- Progress bar -->
-          <div style="margin-top:10px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
-            <div id="demo-progress" style="height:100%;width:0%;background:linear-gradient(90deg,#00F59B,#38BDF8);border-radius:2px;transition:width 0.1s linear;"></div>
-          </div>
-          <!-- Dot indicators -->
-          <div style="display:flex;gap:6px;margin-top:10px;justify-content:center;">
-            <span class="demo-dot active-dot" data-idx="0"></span>
-            <span class="demo-dot" data-idx="1"></span>
-            <span class="demo-dot" data-idx="2"></span>
-            <span class="demo-dot" data-idx="3"></span>
-            <span class="demo-dot" data-idx="4"></span>
-            <span class="demo-dot" data-idx="5"></span>
-          </div>
-        </div>
-
-        <!-- Prev / Next arrows -->
-        <button id="demo-prev" aria-label="Previous" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">&#8249;</button>
-        <button id="demo-next" aria-label="Next" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);color:#fff;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);">&#8250;</button>
-
-        <style>
-          .demo-slide { position:absolute;inset:0;opacity:0;transition:opacity 0.7s ease; }
-          .demo-slide.active-slide { opacity:1; }
-          .demo-dot { width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.25);display:inline-block;cursor:pointer;transition:background 0.3s,transform 0.3s; }
-          .demo-dot.active-dot { background:#00F59B;transform:scale(1.3); }
-          @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-        </style>
-
-        <script>
-          (function(){
-            var slides = document.querySelectorAll('.demo-slide');
-            var dots   = document.querySelectorAll('.demo-dot');
-            var label  = document.getElementById('demo-label');
-            var sub    = document.getElementById('demo-sub');
-            var prog   = document.getElementById('demo-progress');
-            var cur = 0, DURATION = 4000, start = null, paused = false, raf;
-
-            function goTo(n){
-              slides[cur].classList.remove('active-slide');
-              dots[cur].classList.remove('active-dot');
-              cur = (n + slides.length) % slides.length;
-              slides[cur].classList.add('active-slide');
-              dots[cur].classList.add('active-dot');
-              label.textContent = slides[cur].dataset.label;
-              sub.textContent   = slides[cur].dataset.sub;
-              start = null; prog.style.width = '0%';
-            }
-
-            function tick(ts){
-              if(!start) start = ts;
-              var elapsed = ts - start;
-              var pct = Math.min((elapsed / DURATION) * 100, 100);
-              prog.style.width = pct + '%';
-              if(elapsed >= DURATION){ goTo(cur + 1); }
-              raf = requestAnimationFrame(tick);
-            }
-
-            raf = requestAnimationFrame(tick);
-
-            dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(+d.dataset.idx); }); });
-            document.getElementById('demo-prev').addEventListener('click', function(){ goTo(cur - 1); });
-            document.getElementById('demo-next').addEventListener('click', function(){ goTo(cur + 1); });
-
-            // Pause on hover
-            document.getElementById('demo-reel').addEventListener('mouseenter', function(){ cancelAnimationFrame(raf); prog.style.transition='none'; });
-            document.getElementById('demo-reel').addEventListener('mouseleave', function(){ start = null; prog.style.width='0%'; prog.style.transition='width 0.1s linear'; raf = requestAnimationFrame(tick); });
-          })();
-        </script>
+        <style>@keyframes vdot{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
       </div>
 
       <!-- feature callouts below video -->
