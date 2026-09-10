@@ -294,36 +294,76 @@ def render_bmi_diet_planner():
             unsafe_allow_html=True
         )
 
-    # Interactive AI Coach advice
-    if "voice_pipeline" in st.session_state and st.session_state.voice_pipeline:
-        st.markdown("---")
-        st.markdown("### 🤖 Ask AI Coach for Instant Custom Advice")
-        user_query = st.text_input("Koi specific doubt poochhein (e.g. 'Gym se pehle kya khayein?', 'Leg day recovery tips?')")
-        if st.button("⚡ Get Coach Advice", use_container_width=True):
-            if user_query.strip():
-                with st.spinner("AI Coach is analyzing..."):
-                    client = st.session_state.voice_pipeline.llm.client
-                    if client:
-                        try:
-                            resp = client.chat.completions.create(
-                                model="llama-3.1-8b-instant",
-                                messages=[
-                                    {
-                                        "role": "system",
-                                        "content": (
-                                            "You are an elite, certified fitness coach and sports nutritionist. "
-                                            "Answer concisely in friendly, energetic Hinglish (Hindi + English). "
-                                            "Give scientifically backed fitness, diet, and gym advice in 2-3 short bullet points."
-                                        )
-                                    },
-                                    {
-                                        "role": "user",
-                                        "content": f"User BMI: {bmi_val} ({bmi_data['category']}), Goal: {plan['goal']}, Diet: {plan['diet_pref']}. Question: {user_query}"
-                                    }
-                                ],
-                                max_tokens=150,
-                                temperature=0.5
-                            )
-                            st.success(f"🤖 **AI Coach:**\n\n{resp.choices[0].message.content.strip()}")
-                        except Exception:
-                            st.info("Stay consistent, hit your daily protein goal, and drink 3-4 liters of water daily!")
+    # =========================================================================
+    # REAL CONVERSATIONAL AI COACH AGENT
+    # =========================================================================
+    st.markdown("---")
+    st.markdown("### 🤖 Ask AI Coach — Real-Time Sports Nutrition & Workout Agent")
+    st.caption("Ask anything about diet timing, creatine, muscle building, fat loss, or joint safety. Powered by Sports Science AI.")
+
+    from services.coaching.fitness_agent import FitnessAIAgent
+
+    if "coach_chat_history" not in st.session_state:
+        st.session_state["coach_chat_history"] = []
+
+    # Quick prompt suggestion chips
+    st.markdown("<div style='font-size: 12px; color: #94A3B8; margin-bottom: 6px;'>💡 Quick Topics (Click to ask instantly):</div>", unsafe_allow_html=True)
+    q_col1, q_col2, q_col3, q_col4 = st.columns(4)
+    quick_query = None
+    with q_col1:
+        if st.button("⚡ Pre-Workout Diet", key="chip_pre_workout", use_container_width=True):
+            quick_query = "Gym se pehle kya khayein energy ke liye?"
+    with q_col2:
+        if st.button("💊 Creatine Guide", key="chip_creatine", use_container_width=True):
+            quick_query = "Creatine monohydrate kab aur kitna lena chahiye?"
+    with q_col3:
+        if st.button("💪 Muscle Hypertrophy", key="chip_muscle", use_container_width=True):
+            quick_query = "Biceps aur chest ka size kaise badhayein?"
+    with q_col4:
+        if st.button("🩹 Joint Pain Tips", key="chip_knee", use_container_width=True):
+            quick_query = "Squats me knee pain aur shoulder dard se kaise bachein?"
+
+    with st.form("ai_coach_chat_form", clear_on_submit=False):
+        user_input_val = st.text_input(
+            "Apna doubt type karein:",
+            placeholder="e.g. 'Creatine kab lein?', 'Veg diet me protein kaise badhayein?', 'Belly fat loss tips'",
+            value=quick_query if quick_query else "",
+            key="chat_user_query"
+        )
+        col_c1, col_c2 = st.columns([3, 1])
+        with col_c1:
+            ask_submitted = st.form_submit_button("⚡ GET COACH ADVICE", type="primary", use_container_width=True)
+        with col_c2:
+            clear_chat = st.form_submit_button("🗑️ Clear Chat", use_container_width=True)
+
+    if clear_chat:
+        st.session_state["coach_chat_history"] = []
+        st.rerun()
+
+    query_to_process = quick_query if quick_query else (user_input_val.strip() if ask_submitted else None)
+
+    if query_to_process:
+        with st.spinner("AI Coach is formulating scientific guidance..."):
+            agent = FitnessAIAgent()
+            context_data = {
+                "bmi": bmi_val,
+                "category": bmi_data.get("category", "Normal"),
+                "goal": plan.get("goal", "Fitness"),
+                "diet_pref": plan.get("diet_pref", "Veg")
+            }
+            coach_reply = agent.ask(query_to_process, context=context_data)
+            st.session_state["coach_chat_history"].append({"q": query_to_process, "a": coach_reply})
+
+    # Render Chat History
+    if st.session_state["coach_chat_history"]:
+        st.markdown("#### 💬 Conversation with AI Coach:")
+        for idx, chat in enumerate(reversed(st.session_state["coach_chat_history"])):
+            st.markdown(f"""
+                <div style="background: rgba(14, 20, 34, 0.85); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;">
+                    <div style="color: #38BDF8; font-weight: 700; font-size: 13px;">👤 You: {chat['q']}</div>
+                </div>
+                <div style="background: linear-gradient(135deg, rgba(16, 30, 54, 0.95), rgba(10, 25, 47, 0.98)); border: 1px solid #00F59B; border-radius: 10px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 4px 16px rgba(0,245,155,0.15);">
+                    <div style="color: #00F59B; font-weight: 800; font-size: 12px; margin-bottom: 6px;">🤖 APNA AI COACH:</div>
+                    <div style="color: #F8FAFC; font-size: 14px; line-height: 1.6; white-space: pre-line;">{chat['a']}</div>
+                </div>
+            """, unsafe_allow_html=True)

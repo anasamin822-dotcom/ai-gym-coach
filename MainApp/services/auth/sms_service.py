@@ -28,12 +28,12 @@ def send_otp(phone_number: str) -> dict:
 
     # 1. Fast2SMS API Key (Popular, instant setup in India)
     fast2sms_key = os.environ.get("FAST2SMS_API_KEY", "")
-    try:
-        import streamlit as st
-        if not fast2sms_key and hasattr(st, "secrets") and "FAST2SMS_API_KEY" in st.secrets:
-            fast2sms_key = st.secrets["FAST2SMS_API_KEY"]
-    except Exception:
-        pass
+    if not fast2sms_key:
+        try:
+            import streamlit as st
+            fast2sms_key = str(st.secrets.get("FAST2SMS_API_KEY", ""))
+        except Exception:
+            fast2sms_key = "" 
 
     if fast2sms_key:
         try:

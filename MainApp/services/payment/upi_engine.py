@@ -52,10 +52,9 @@ PLANS = {
 def get_upi_id() -> str:
     upi_id = DEFAULT_UPI_ID
     try:
-        if hasattr(st, "secrets") and "UPI_ID" in st.secrets:
-            upi_id = st.secrets["UPI_ID"]
+        upi_id = str(st.secrets.get("UPI_ID", DEFAULT_UPI_ID))
     except Exception:
-        pass
+        upi_id = DEFAULT_UPI_ID
     return upi_id
 
 
