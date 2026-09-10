@@ -25,6 +25,7 @@ from services.coaching.llm import LLMCoach
 from services.coaching.tts import TextToSpeech
 from services.coaching.voice_pipeline import VoicePipeline, autoplay_audio
 from services.ui.bmi_diet_view import render_bmi_diet_planner
+from services.ui.twin_3d_view import render_3d_digital_twin
 from services.ui.session_ui import render_rest_timer_overlay, render_workout_summary_section
 from services.reporting.workout_report import calculate_session_metrics
 
@@ -274,8 +275,9 @@ def main():
         st.markdown("")
         st.success(f"🤖 **Coach:** {st.session_state.coach_feedback}")
 
-    tab_workout, tab_diet, tab_history, tab_pro = st.tabs([
+    tab_workout, tab_3d, tab_diet, tab_history, tab_pro = st.tabs([
         "🏋️‍♂️ Live Workout & AI Coach",
+        "🧬 3D Digital Twin & Biomechanics",
         "🥗 BMI & Diet Planner",
         "📈 Workout History",
         "👑 Pro Athlete & UPI Pay"
@@ -410,6 +412,9 @@ def main():
                 st.rerun()
 
             inject_webrtc_styles()
+
+    with tab_3d:
+        render_3d_digital_twin()
 
     with tab_diet:
         render_bmi_diet_planner()

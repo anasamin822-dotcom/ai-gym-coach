@@ -54,6 +54,8 @@
       href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&family=Instrument+Serif:ital,wght@0,400;1,400&display=swap"
       rel="stylesheet"
     />
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   </head>
   <body>
     <!-- GRID OVERLAY -->
@@ -144,6 +146,56 @@
         <p class="section-desc">
           Zero wearables or proprietary hardware required. Any camera becomes a high-precision kinematic lab.
         </p>
+      </div>
+
+      <!-- 3D INTERACTIVE BIOMECHANICAL ARENA -->
+      <div id="arena-3d" style="position: relative; margin: 36px 0 44px 0; width: 100%; height: 560px; border-radius: 20px; overflow: hidden; border: 1px solid rgba(0, 245, 155, 0.4); box-shadow: 0 0 50px rgba(0, 245, 155, 0.15), inset 0 0 40px rgba(6, 11, 20, 0.9); background: radial-gradient(circle at center, #0B132B 0%, #060B14 100%);">
+        <div id="hero-3d-canvas-container" style="width: 100%; height: 100%; cursor: grab;"></div>
+        
+        <!-- 3D HUD Header -->
+        <div style="position: absolute; top: 18px; left: 20px; z-index: 10; pointer-events: none;">
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 245, 155, 0.15); border: 1px solid #00F59B; color: #00F59B; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; padding: 4px 10px; border-radius: 999px; text-transform: uppercase;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #00F59B; box-shadow: 0 0 8px #00F59B;"></span>
+            MediaPipe 33-Joint 3D Kinematics
+          </div>
+          <div style="font-family: var(--font-display); font-size: 22px; font-weight: 900; color: #FFFFFF; margin-top: 4px; letter-spacing: -0.01em;">
+            AI BIOMECHANICAL DIGITAL TWIN
+          </div>
+          <div style="font-size: 11px; color: #94A3B8;">Drag mouse to rotate 360° &bull; Select exercise to simulate real-time form</div>
+        </div>
+
+        <!-- Telemetry Panel -->
+        <div style="position: absolute; top: 18px; right: 20px; z-index: 10; background: rgba(10, 20, 36, 0.9); border: 1px solid rgba(56, 189, 248, 0.35); backdrop-filter: blur(12px); border-radius: 12px; padding: 12px 16px; min-width: 180px; pointer-events: none; box-shadow: 0 8px 30px rgba(0,0,0,0.6);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px;">
+            <span style="color: #94A3B8; font-weight: 600;">ACTIVE SIMULATION</span>
+            <span style="color: #00F59B; font-weight: 800;" id="hero-disp-exercise">SQUATS</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px;">
+            <span style="color: #94A3B8; font-weight: 600;">JOINT ANGLE</span>
+            <span style="color: #38BDF8; font-weight: 800; font-family: monospace;" id="hero-disp-angle">88° (DEPTH)</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 11px;">
+            <span style="color: #94A3B8; font-weight: 600;">FORM RATING</span>
+            <span style="color: #00F59B; font-weight: 800;" id="hero-disp-status">PERFECT 100%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+            <span style="color: #94A3B8; font-weight: 600;">VELOCITY</span>
+            <span style="color: #FBBF24; font-weight: 800;" id="hero-disp-fatigue">1.2 m/s (OPTIMAL)</span>
+          </div>
+        </div>
+
+        <div style="position: absolute; bottom: 64px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #64748B; letter-spacing: 0.05em; pointer-events: none; text-transform: uppercase; font-weight: 700;">
+          🖱️ DRAG TO ROTATE 360° &bull; SCROLL TO ZOOM
+        </div>
+
+        <!-- Mode Buttons -->
+        <div style="position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; gap: 8px; background: rgba(10, 20, 36, 0.92); border: 1px solid rgba(255, 255, 255, 0.15); backdrop-filter: blur(14px); padding: 6px 10px; border-radius: 999px; box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7); max-width: 95vw; overflow-x: auto;">
+          <button class="hero-3d-btn active" data-mode="squat" style="background: #00F59B; color: #060B14; font-weight: 800; border: 1px solid #00F59B; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 14px rgba(0,245,155,0.4); transition: all 0.2s;">🏋️ Squats</button>
+          <button class="hero-3d-btn" data-mode="curl" style="background: transparent; color: #94A3B8; font-weight: 700; border: 1px solid transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">💪 Bicep Curls</button>
+          <button class="hero-3d-btn" data-mode="pushup" style="background: transparent; color: #94A3B8; font-weight: 700; border: 1px solid transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">💥 Push-Ups</button>
+          <button class="hero-3d-btn" data-mode="press" style="background: transparent; color: #94A3B8; font-weight: 700; border: 1px solid transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">⚡ Shoulder Press</button>
+          <button class="hero-3d-btn" data-mode="scan" style="background: transparent; color: #94A3B8; font-weight: 700; border: 1px solid transparent; padding: 6px 14px; border-radius: 999px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">🧘 360° Scan</button>
+        </div>
       </div>
 
       <div class="card-grid">
