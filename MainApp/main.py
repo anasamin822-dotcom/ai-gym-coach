@@ -87,7 +87,7 @@ def main():
 
         if not is_pro:
             with st.expander("⚡ Upgrade via UPI QR Code", expanded=False):
-                render_upi_payment_modal(u_id, key_prefix="sidebar")
+                render_upi_payment_modal(u_id, is_sidebar=True, key_prefix="sidebar")
 
         st.divider()
 
@@ -488,7 +488,7 @@ def main():
                 </div>
             ''', unsafe_allow_html=True)
 
-        render_upi_payment_modal(user_id_pro, key_prefix="tab_pro")
+        render_upi_payment_modal(user_id_pro, is_sidebar=False, key_prefix="tab_pro")
 
         # Payment audit log
         user_payments = get_user_payments(user_id_pro) if user_id_pro else []
