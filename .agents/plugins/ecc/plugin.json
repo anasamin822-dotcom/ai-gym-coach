@@ -1,0 +1,10 @@
+﻿{
+  "name": "ecc",
+  "version": "2.2.1",
+  "description": "Harness-native ECC operator layer - Developer profile with Python & TypeScript engineering guidance",
+  "author": "Affaan Mustafa",
+  "homepage": "https://ecc.tools",
+  "repository": "https://github.com/affaan-m/ECC.git",
+  "profile": "developer",
+  "enabled": true
+}

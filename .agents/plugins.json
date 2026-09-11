@@ -1,0 +1,8 @@
+﻿{
+  "plugins": {
+    "ecc": {
+      "enabled": true,
+      "source": "https://github.com/affaan-m/ECC.git"
+    }
+  }
+}

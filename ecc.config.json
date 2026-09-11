@@ -1,0 +1,50 @@
+﻿{
+  "name": "ai-gym-coach",
+  "version": "1.0.0",
+  "harness": {
+    "profile": "developer",
+    "languages": ["python", "typescript", "javascript"],
+    "frameworks": ["fastapi", "react", "nextjs"]
+  },
+  "paths": {
+    "backend": {
+      "entrypoint": "app.py",
+      "models": "ml_models/",
+      "requirements": "requirements.txt"
+    },
+    "frontend": {
+      "landing": "LandingPage/",
+      "app": "MainApp/",
+      "design_spec": "DESIGN.md",
+      "product_spec": "PRODUCT.md"
+    }
+  },
+  "plugins": {
+    "ecc": {
+      "enabled": true,
+      "source": "https://github.com/affaan-m/ECC.git",
+      "version": "2.2.1"
+    },
+    "impeccable": {
+      "enabled": true,
+      "tier": "full"
+    }
+  },
+  "active_skills": [
+    "tdd-workflow",
+    "verification-loop",
+    "security-review",
+    "strategic-compact",
+    "delivery-gate",
+    "context-budget",
+    "agent-self-evaluation",
+    "impeccable",
+    "design-taste-frontend",
+    "emil-design-eng"
+  ],
+  "verification": {
+    "python": "python -m py_compile app.py",
+    "design": ".agents/skills/impeccable/scripts/impeccable context",
+    "ecc_health": "node C:/Users/ANAS/.gemini/antigravity/scratch/ECC-temp/scripts/doctor.js --target antigravity"
+  }
+}
